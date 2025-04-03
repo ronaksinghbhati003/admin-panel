@@ -6,7 +6,8 @@ export default function Login() {
     let handleChange=(e)=>{
         setEmpty({...empty,[e.target.name]:e.target.value})
     }
-    let isValid=empty.email&&empty.password;
+    let isValid=empty.email&&empty.password.length>8;
+    console.log(isValid); 
     console.log(empty)
   return (
       <>
@@ -18,7 +19,7 @@ export default function Login() {
                  <form className='p-5'>
                      <h1 className='font-semibold text-[25px]'>Sign in Account</h1>
                      <label className='mb-[10px] inline-block mt-[10px]'>Email</label>
-                     <input type='email' className='w-[100%] p-[5px_5px] border rounded-lg' placeholder='Enter Email Address' name='email' onKeyDown={handleChange}/>
+                     <input type='email' className='w-[100%] p-[5px_5px] border rounded-lg' placeholder='Enter Email Address' name='email' onChange={handleChange}/>
                      <label className='mb-[10px] inline-block mt-[10px]'>Password</label>
                      <input type='password' className='w-[100%] p-[5px_5px] border rounded-lg' name='password' onChange={handleChange}/>
                      {!isValid?<div className='text-center text-red-500 mt-[20px]'>Please Enter User Name and Password</div>:
