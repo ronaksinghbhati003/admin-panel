@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaBars, FaRegUserCircle } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { RiProfileFill } from "react-icons/ri";
+import { Link } from 'react-router-dom';
 
 export default function Dashboardheader() {
     let[hover,setHover]=useState(false);
@@ -28,11 +29,11 @@ export default function Dashboardheader() {
              <div className={`absolute right-[50%] bg-white shadow-[0px_0px_2px_0px_black] py-[10px] w-[200px] rounded-2xl top-[100%] ${hover?'block':'hidden'}`}>
                     <div className='flex items-center gap-[10px] border-b-1 border-b-gray-400 py-[5px] pl-[10px]'>
                             <FaRegUserCircle className='font-medium'/>
-                            <p className='font-medium'>Profile</p>
+                            <p className='font-medium'><Link to={'/profile'}>Profile</Link></p>
                     </div>
                     <div className='flex items-center gap-[10px] border-b-1 border-b-gray-400 py-[5px] pl-[10px]'>
                             <RiProfileFill className='font-medium'/>
-                            <p className='font-medium'>Company Profile</p>
+                            <p className='font-medium'><Link to={'/companyprofile'}>Company Profile</Link></p>
                     </div>
                     <div className='flex items-center gap-[10px]  py-[5px] pl-[10px]'>
                             <IoLogOut className='font-medium'/>

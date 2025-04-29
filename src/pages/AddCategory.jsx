@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaCloudDownloadAlt } from "react-icons/fa";
 
 export default function AddCategory() {
+  let[image,setImage]=useState(null);
   return (
     <>
          <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
@@ -18,12 +19,21 @@ export default function AddCategory() {
                           <div className=''>
                             <p className='font-semibold block'>Catergory Image</p>
                             <label for="upload">
-                                  <div className='w-[350px] h-[250px] shadow-[0px_0px_5px_1px_gray] flex flex-col items-center justify-center mt-[10px]'>
+                                  <div className=' relative w-[350px] h-[250px] shadow-[0px_0px_5px_1px_gray] flex flex-col items-center justify-center mt-[10px]'>
                                         <FaCloudDownloadAlt className='text-gray-400 text-[50px]'/>
                                         <span className='text-center'>Drag and Drop</span>
+                                        {image?<div className='absolute w-[100%] h-[100%] top-[0] left-[0]'>
+                                                <img className='w-[100%] h-[100%]' src={image}/>
+                                               </div>:''}
                                   </div>
                             </label>
-                            <input type='file' className='hidden' id="upload" name="categoryImage"/>
+                            <input type='file' className='hidden' id="upload" name="categoryImage" onChange={(e)=>{
+                                   const File=e.target.files[0];
+                                   if(File){
+                                    const imageUrl=URL.createObjectURL(File);
+                                    setImage(imageUrl);
+                                   }
+                            }}/>
                           </div>
                           <button className="p-[8px_15px] bg-[#7E22CE] rounded-lg text-white my-[20px]" >Add Category</button>
                      </div>

@@ -9,7 +9,6 @@ export default function AddColor() {
 
     let colorChange = (color) => {
         setColor(color.hex)
-        console.log("ronak singh bhati");
     }
     return (
         <>

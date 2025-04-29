@@ -13,11 +13,13 @@ import AddSubCategory from './pages/AddSubCategory.jsx'
 import AddSubSubCategory from './pages/AddSubSubCategory.jsx'
 import AddTestimonials from './pages/AddTestimonials.jsx'
 import AddWhyChoose from './pages/AddWhyChoose.jsx'
+import CompanyProfile from './pages/CompanyProfile.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Enquiry from './pages/Enquiry.jsx'
 import Login from './pages/Login'
 import Newsletter from './pages/Newsletter.jsx'
 import Orders from './pages/Orders.jsx'
+import Profile from './pages/Profile.jsx'
 import ViewCategory from './pages/ViewCategory.jsx'
 import ViewColor from './pages/ViewColor.jsx'
 import ViewCountry from './pages/ViewCountry.jsx'
@@ -146,6 +148,14 @@ let router=createBrowserRouter([
          {
           path:'/viewfaq',
           element:<ViewFaq/>
+         },
+         {
+          path:'/profile',
+          element:<Profile/>
+         },
+         {
+          path:'/companyprofile',
+          element:<CompanyProfile/>
          }
       ]
     }   
