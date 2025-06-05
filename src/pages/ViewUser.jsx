@@ -1,10 +1,48 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
 
 export default function ViewUser() {
     let[show,setShow]=useState(false);
+    let[user,setUser]=useState([]);
+    let[select,setSelect]=useState([]);
+    console.log(select);
+    let apiUrl=import.meta.env.VITE_APIURL;
+      let getData=()=>{
+        axios.get(`${apiUrl}/user/userview`)
+        .then((res)=>{
+          setUser(res.data.viewUser);
+        })
+        .catch((err)=>{
+          console.log(err);
+        })
+      }
+
+    let allSelect=(event)=>{
+        if(event.target.checked){
+          setSelect(user.map((item)=>item._id));
+        }
+        else{
+          setSelect([]);
+        }
+    }
+
+    let handleChange=(event)=>{
+        if(event.target.checked){
+           setSelect([...select,event.target.value]);
+        }
+        else{
+          setSelect(select.filter(item=>item!=event.target.value));
+        }
+    }
+
+
+      useEffect(()=>{
+        getData();
+      },[]);
+
   return (
      <>
         <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
@@ -39,7 +77,7 @@ export default function ViewUser() {
                 <table className='w-[100%]'>
                       <thead className='' bgcolor='#374151'>
                          <tr>
-                            <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox'/></th>
+                            <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={user.length==select.length&&user.length>=1}  onChange={allSelect}/></th>
                             <th className='border p-[10px_10px] text-gray-400 font-normal w-[600px] text-left'> Name</th>
                             <th className='border p-[10px_10px] text-gray-400 font-normal'>EMAIL ID</th>
                             <th className='border p-[10px_10px] text-gray-400 font-normal'>Mobile Number</th>
@@ -48,22 +86,26 @@ export default function ViewUser() {
                          </tr>
                       </thead>
                       <tbody className='' bgcolor="#1F2937">
-                        <tr className='text-center'>
-                             <td className=' p-[30px_10px] text-white'><input type='checkbox'/></td>
-                             <td className=' p-[30px_10px] text-white text-left'>Ronak Singh Bhati</td>
-                             <td className=' p-[30px_10px] text-gray-400 text-[14px]'>singhbhatironak2004@gmail.com</td>
-                             <td className=' p-[30px_10px] text-gray-400'>8279235047</td>
-                             <td className=' p-[30px_10px] text-white'><button className='p-[5px_20px] text-white bg-[#22C35D] rounded-lg cursor-pointer'>Active</button></td>
-                             <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer'/></td>
-                        </tr>
-                        <tr className='text-center'>
-                             <td className=' p-[30px_10px] text-white'><input type='checkbox'/></td>
-                             <td className=' p-[30px_10px] text-white text-left'>Arvind Singh</td>
-                             <td className=' p-[30px_10px] text-gray-400 text-[14px]'>singhbhatiarvind@gmail.com</td>
-                             <td className=' p-[30px_10px] text-gray-400'>7014439020</td>
-                             <td className=' p-[30px_10px] text-white'><button className='p-[5px_20px] text-white bg-[#F35959] rounded-lg cursor-pointer'>Deactive</button></td>
-                             <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer'/></td>
-                        </tr>
+
+                        {user.length>=1?
+                              user.map((item,index)=>{
+                                let{userEmail,userName,userNumber,userStatus,_id}=item;
+                                return(
+                              <tr className='text-center' key={_id}>
+                                   <td className=' p-[30px_10px] text-white'><input type='checkbox' checked={select.includes(_id)} value={_id} onChange={handleChange} /></td>
+                                   <td className=' p-[30px_10px] text-white text-left'>{userName}</td>
+                                   <td className=' p-[30px_10px] text-gray-400 text-[14px]'>{userEmail}</td>
+                                   <td className=' p-[30px_10px] text-gray-400'>{userNumber}</td>
+                                   <td className=' p-[30px_10px] text-white'><button className={`p-[5px_20px] text-white ${userStatus?"bg-[#22C35D]":"bg-red-500"}  rounded-lg cursor-pointer`}>{userStatus?"Active":"Deactive"}</button></td>
+                                   <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer'/></td>
+                             </tr>
+                                )
+                              })
+                         :
+                           <tr className='text-center'>
+                               <td colSpan={6} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
+                            </tr>
+                         }
                       </tbody>
                       
                 </table>

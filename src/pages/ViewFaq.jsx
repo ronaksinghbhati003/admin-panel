@@ -1,11 +1,113 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
+import { Link } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import { routePath } from './Config';
+;
 export default function ViewFaq() {
-    let[show,setShow]=useState(false);
-  return (
-    <>
+    let [show, setShow] = useState(false);
+    let [data, setData] = useState([]);
+    let [selectId, setSelectId] = useState([]);
+    let[question,setQuestion]=useState('');
+    let[answer,setAnswer]=useState('');
+    let getData = () => {
+        axios.get(`${routePath}/faq/view`,{
+            params:{
+                question,
+                answer
+            }
+        }).
+            then(res => {
+                if (res.data.status == 1) {
+                    setData(res.data.viewData);
+                    /*toast.success(res.data.msg, {
+                        position: 'top-center',
+                        theme: 'dark',
+                        autoClose: 1500,
+                        draggable: true
+                    });*/
+                }
+
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
+
+    let allSelect = (event) => {
+        if (event.target.checked) {
+            setSelectId(data.map(item => item._id));
+        }
+        else {
+            setSelectId([]);
+        }
+    }
+
+    let handleChange = (id) => {
+        if (selectId.includes(id)) {
+            setSelectId(selectId.filter(item => item != id));
+        }
+        else {
+            setSelectId([...selectId, id]);
+            console.log("Bhati")
+        }
+    }
+
+    let dataDelete = () => {
+        axios.delete(`${routePath}/faq/delete`, {
+            data: { ids: selectId }
+        })
+            .then(res => {
+             
+                res.data.msg.includes("Delete")? toast.success(res.data.msg, {
+                    position: 'top-center',
+                    autoClose: 2000,
+                    theme: 'dark',
+                }):
+                 toast.warning(res.data.msg, {
+                    position: 'top-center',
+                    autoClose: 2000,
+                    theme: 'dark',
+                });
+                ;   
+                getData();
+            }).catch((err) => {
+                alert(err.message);
+            })
+
+    }
+
+     let updateStatus=(id,status)=>{
+        axios.put(`${routePath}/faq/active`,{
+            id,
+            status
+        })
+        .then(res=>{
+            console.log(res);
+              toast.success(res.data.msg,{
+                position:"top-center",
+                theme:"dark",
+                autoClose:1500
+              })
+        getData();
+        })
+        .catch(err=>{
+            console.log(err);
+        })
+    }
+
+    useEffect(() => {
+        if(question==''&&answer==''){
+            getData()
+        }
+        
+    }, [question,answer])
+    return (
+        <>
+            <ToastContainer />
             <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
                 <p>Home</p>
                 <p>/</p>
@@ -14,39 +116,61 @@ export default function ViewFaq() {
                 <p>view</p>
             </div>
 
-           <div className='w-[100%] p-[20px_10px]'>
-                                            {
-                                                show ?
-                                                    <div className='p-[20px_10px] border rounded-lg  mb-[25px] bg-gray-300 '>
-                                                        <form className='flex items-center gap-[10px]'>
-                                                            <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Name' name="viewFaq" />
-                                                            <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' />
-                                                        </form>
-                                                    </div> : " "
-                                            }
-                                            <div className=''>
-                                                <div className='flex justify-between border p-[15px_10px] rounded-lg bg-[#F1F5F9]'>
-                                                    <h1 className='text-[25px] font-semibold'>View Faq</h1>
-                                                    <div className='flex items-center gap-[10px]'>
-                                                        {show ? <MdFilterAltOff className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} /> : <FaFilter className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} />}
-                                                        <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer'>Change Status</button>
-                                                        <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer'>Delete</button>
-                                                    </div>
-                                                </div>
-                                                <div className='rounded-lg overflow-hidden'>
-                                                    <table className='w-[100%]'>
-                                                        <thead className='' bgcolor='#374151'>
-                                                            <tr>
-                                                                <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' /></th>
-                                                                <th className='border p-[10px_10px] text-gray-400 font-normal w-[350px] text-left'>Question</th>
-                                                                <th className='border p-[10px_10px] text-gray-400 font-normal w-[500px] text-left'>Answer</th>
-                                                                <th className='border p-[10px_10px] text-gray-400 font-normal'>Order</th>
-                                                                <th className='border p-[10px_10px] text-gray-400 font-normal'>Status</th>
-                                                                <th className='border p-[10px_10px] text-gray-400 font-normal'>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className='' bgcolor="#1F2937">
-                                                            <tr className='text-center'>
+            <div className='w-[100%] p-[20px_10px]'>
+                {
+                    show ?
+                        <div className='p-[20px_10px] border rounded-lg  mb-[25px] bg-gray-300 '>
+                            <form className='flex items-center gap-[10px]'>
+                                <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Question' name="viewFaq" onChange={(e)=>{
+                                    setQuestion(e.target.value);
+                                }} />
+                                <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Answer' name="viewFaq" onChange={(e)=>{
+                                    setAnswer(e.target.value);
+                                }} />
+                                <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' onClick={getData} />
+                            </form>
+                        </div> : " "
+                }
+                <div className=''>
+                    <div className='flex justify-between border p-[15px_10px] rounded-lg bg-[#F1F5F9]'>
+                        <h1 className='text-[25px] font-semibold'>View Faq</h1>
+                        <div className='flex items-center gap-[10px]'>
+                            {show ? <MdFilterAltOff className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} /> : <FaFilter className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} />}
+                            <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer'>Change Status</button>
+                            <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer' onClick={dataDelete}>Delete</button>
+                        </div>
+                    </div>
+                    <div className='rounded-lg overflow-hidden'>
+                        <table className='w-[100%]'>
+                            <thead className='' bgcolor='#374151'>
+                                <tr>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={selectId.length == data.length && data.length >= 1&&data.length!=0} onChange={allSelect} /></th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal w-[350px] text-left'>Question</th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal w-[500px] text-left'>Answer</th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal'>Order</th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal'>Status</th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal'>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className='' bgcolor="#1F2937">
+                                {data.length >= 1 ? data.map((item, index) => {
+                                    let { faqQuestion, faqAnswer, faqOrder, faqStatus, _id } = item;
+                                    return (
+                                        <tr className='text-center' key={index}>
+                                            <td className=' p-[30px_10px] text-white'><input type='checkbox' checked={selectId.includes(_id)} onChange={() => handleChange(_id)} /></td>
+                                            <td className=' p-[30px_10px] text-white text-left'>{faqQuestion}</td>
+                                            <td className=' p-[30px_10px] text-white text-justify'>{faqAnswer}</td>
+                                            <td className=' p-[30px_10px] text-gray-400'>{faqOrder}</td>
+                                            <td className=' p-[30px_10px] text-white'>{faqStatus ? <button className='p-[5px_20px] text-white bg-[#22C35D] rounded-lg cursor-pointer' onClick={()=>updateStatus(_id,false)}>Active</button> : <button className='p-[5px_20px] text-white bg-red-500 rounded-lg cursor-pointer' onClick={()=>updateStatus(_id,true)}>Deactive</button>}</td>
+                                            <td className=' p-[30px_10px] text-white'><Link to={`/updatefaq/${_id}`}><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></Link></td>
+                                        </tr>
+                                    )
+                                }) :
+                                    <tr className='text-center'>
+                                        <td colSpan={6} className='py-2 text-white text-[20px] '>Cart is empty data not found</td>
+                                    </tr>
+                                }
+                                {/*<tr className='text-center'>
                                                                 <td className=' p-[30px_10px] text-white'><input type='checkbox' /></td>
                                                                 <td className=' p-[30px_10px] text-white text-left'>Roank Singh Bhati</td> 
                                                                 <td className=' p-[30px_10px] text-white text-justify'>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repudiandae adipisci explicabo molestias possimus quidem obcaecati deserunt vel, officiis, nobis facilis earum quaerat aut esse consequuntur ab praesentium eius suscipit natus!</td>                                            
@@ -61,15 +185,15 @@ export default function ViewFaq() {
                                                                 <td className=' p-[30px_10px] text-gray-400'>5</td>
                                                                 <td className=' p-[30px_10px] text-white'><button className='p-[5px_20px] text-white bg-[#F35959] rounded-lg cursor-pointer'>Deactive</button></td>
                                                                 <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></td>
-                                                            </tr>
-                                                            
-                                                        </tbody>
-                            
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-           
-    </>
-  )
+                                                            </tr>*/}
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </>
+    )
 }

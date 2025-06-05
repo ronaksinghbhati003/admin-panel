@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './common/Layout'
+import MainLayout from './common/MainLayout.jsx'
 import './index.css'
 import AddCategory from './pages/AddCategory.jsx'
 import AddColor from './pages/AddColor.jsx'
@@ -66,12 +67,20 @@ let router=createBrowserRouter([
           element:<ViewColor/>
          },
          {
+           path:'/updatecolor/:id',
+           element:<AddColor/>
+         },
+         {
           path:'/addmaterial',
           element:<AddMaterial/>
          },
          {
           path:'/viewmaterial',
           element:<ViewMaterial/>
+         },
+         {
+           path:'/updatematerial/:id',
+           element:<AddMaterial/>
          },
          {
           path:'/addcategory',
@@ -82,6 +91,10 @@ let router=createBrowserRouter([
           element:<ViewCategory/>
          },
          {
+            path:'/update/category/:id?',
+            element:<AddCategory/>
+         },
+         {
           path:'/addsubcategory',
           element:<AddSubCategory/>
          },
@@ -90,12 +103,20 @@ let router=createBrowserRouter([
           element:<ViewSubCategory/>
          },
          {
+           path:'/updatesubcategory/:id',
+           element:<AddSubCategory/>
+         },
+         {
           path:'/addsubsubcategory',
           element:<AddSubSubCategory/>
          },
          {
           path:'/viewsubsubcategory',
           element:<ViewSubSubCategory/>
+         },
+         {
+            path:'/updatesubsubcategory/:sid',
+            element:<AddSubSubCategory/>
          },
          {
           path:'/addproduct',
@@ -114,6 +135,10 @@ let router=createBrowserRouter([
           element:<ViewWhyChoose/>
          },
          {
+          path:'/updatewhychooseus/:id',
+          element:<AddWhyChoose/>
+         },
+         {
           path:'/orders',
           element:<Orders/>
          },
@@ -126,12 +151,20 @@ let router=createBrowserRouter([
           element:<ViewSlider/>
          },
          {
+          path:'/updateslider/:id',
+          element:<AddSlider/>
+         },
+         {
           path:'/addcountry',
           element:<AddCountry/>
          },
          {
           path:'/viewcountry',
           element:<ViewCountry/>
+         },
+         {
+          path:'/updatecountry/:id',
+          element:<AddCountry/>
          },
          {
           path:'/addtestimonials',
@@ -142,12 +175,20 @@ let router=createBrowserRouter([
           element:<ViewTestimonials/>
          },
          {
+             path:'/updatetestimonials/:id',
+             element:<AddTestimonials/>
+         },
+         {
           path:'/addfaq',
           element:<AddFaq/>
          },
          {
           path:'/viewfaq',
           element:<ViewFaq/>
+         },
+         {
+             path:'/updatefaq/:id',
+             element:<AddFaq/>
          },
          {
           path:'/profile',
@@ -163,6 +204,9 @@ let router=createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <> 
+
+    <MainLayout>
      <RouterProvider router={router} /> 
+    </MainLayout>
   </>,
 )

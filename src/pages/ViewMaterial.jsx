@@ -1,11 +1,93 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
+import { Link } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import { routePath } from './Config';
 export default function ViewMaterial() {
     let[show,setShow]=useState(false);
+    let[data,setData]=useState([]);
+    let[selectId,setSelectId]=useState([]);
+    let[searchMaterial,setSearchMaterial]=useState('');
+    let getData=()=>{
+        axios.get(`${routePath}/material/view`,{
+            params:{
+                searchMaterial
+            }
+        })
+        .then((res)=>{
+            setData(res.data.viewData);
+        })
+        .catch((error)=>{
+            console.log(error.message);
+        })
+    }
+
+     let allSelect=(event)=>{
+        if(event.target.checked){
+            let allId=data.map(item=>item._id);
+            setSelectId(allId);
+        }
+        else{
+            setSelectId([]);
+        }
+     }
+
+     let handleCheckBox=(id)=>{
+        if(selectId.includes(id)){
+            setSelectId(selectId.filter(item=>item!=id))
+        }
+        else{
+            setSelectId([...selectId,id])
+        }
+     }
+
+    let deleteAllData=()=>{
+        axios.delete(`${routePath}/material/delete`,{
+          data: {ids:selectId}
+        })
+        .then((res)=>{
+            console.log(res.data.msg);
+            if(res.data.status==1){
+                toast.success(res.data.msg);
+                getData();
+            }
+            else{
+                toast.error("Something went Wrong")
+            }
+            
+        })
+    }
+
+    let updateStatus=(id,status)=>{
+        axios.put(`${routePath}/material/active`,{
+            id,
+            status
+        })
+        .then(res=>{
+              toast.success(res.data.msg,{
+                position:"top-center",
+                theme:"dark",
+                autoClose:1500
+              })
+        getData();
+        })
+        .catch(err=>{
+            console.log(err);
+        })
+    }
+
+    useEffect(()=>{
+        if(searchMaterial==''){
+            getData()
+        }
+        
+    },[searchMaterial])
   return (
     <>
+    <ToastContainer/>
        <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
                 <p>Home</p>
                 <p>/</p>
@@ -18,8 +100,10 @@ export default function ViewMaterial() {
                              show ?
                                  <div className='p-[20px_10px] border rounded-lg  mb-[25px] bg-gray-300 '>
                                      <form className='flex items-center gap-[10px]'>
-                                         <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Name' name="viewmaterial" />
-                                         <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' />
+                                         <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Name' name="viewmaterial" onChange={(e)=>{
+                                            setSearchMaterial(e.target.value);
+                                         }} />
+                                         <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' onClick={getData} />
                                      </form>
                                  </div> : " "
                          }
@@ -29,14 +113,14 @@ export default function ViewMaterial() {
                                  <div className='flex items-center gap-[10px]'>
                                      {show ? <MdFilterAltOff className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} /> : <FaFilter className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} />}
                                      <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer'>Change Status</button>
-                                     <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer'>Delete</button>
+                                     <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer' onClick={deleteAllData}>Delete</button>
                                  </div>
                              </div>
                              <div className='rounded-lg overflow-hidden'>
                                  <table className='w-[100%]'>
                                      <thead className='' bgcolor='#374151'>
                                          <tr>
-                                             <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' /></th>
+                                             <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={data.length==selectId.length&&data.length>=1&&data.length!=0} onChange={allSelect}/></th>
                                              <th className='border p-[10px_10px] text-gray-400 font-normal w-[600px] text-left'>Material Name</th>
                                              <th className='border p-[10px_10px] text-gray-400 font-normal'>Order</th>
                                              <th className='border p-[10px_10px] text-gray-400 font-normal'>Status</th>
@@ -44,7 +128,24 @@ export default function ViewMaterial() {
                                          </tr>
                                      </thead>
                                      <tbody className='' bgcolor="#1F2937">
-                                         <tr className='text-center'>
+                                        {data.length>=1?data.map((item,index)=>{
+                                            let{materialName,materialOrder,materialStatus,_id}=item;
+                                            return(
+                                                <tr className='text-center' key={index}>
+                                                <td className=' p-[30px_10px] text-white'><input type='checkbox' checked={selectId.includes(_id)} onChange={()=>handleCheckBox(_id)}/></td>
+                                                <td className=' p-[30px_10px] text-white text-left'>{materialName}</td>                                            
+                                                <td className=' p-[30px_10px] text-gray-400'>{materialOrder}</td>
+                                                <td className=' p-[30px_10px] text-white'><button className={`p-[5px_20px] text-white ${materialStatus?"bg-[#22C35D]":"bg-red-500"}  rounded-lg cursor-pointer`} onClick={()=>updateStatus(_id,!materialStatus)}>{materialStatus?'Active':'Deactive'}</button></td>
+                                                <td className=' p-[30px_10px] text-white'><Link to={`/updatematerial/${_id}`}><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></Link></td>
+                                            </tr> 
+                                            )
+                                        })
+                                       :
+                                       <tr className='text-center'>
+                                            <td colSpan={6} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
+                                        </tr>
+                                    }
+                                        {/* <tr className='text-center'>
                                              <td className=' p-[30px_10px] text-white'><input type='checkbox' /></td>
                                              <td className=' p-[30px_10px] text-white text-left'>Ronak Singh Bhati</td>                                            
                                              <td className=' p-[30px_10px] text-gray-400'>1</td>
@@ -58,7 +159,7 @@ export default function ViewMaterial() {
                                              <td className=' p-[30px_10px] text-white'><button className='p-[5px_20px] text-white bg-[#F35959] rounded-lg cursor-pointer'>Deactive</button></td>
                                              <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></td>
                                          </tr>
-                                         
+                                        */}
                                      </tbody>
          
                                  </table>

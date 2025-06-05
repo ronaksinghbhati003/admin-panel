@@ -1,11 +1,97 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
+import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import { routePath } from './Config';
 export default function ViewCategory() {
 let[show,setShow]=useState(false);
+let[data,setData]=useState([]);
+let[path,setPath]=useState('');
+let[delData,setDelData]=useState([]);
+let[search,setSearch]=useState('');
+let getData=()=>{
+    axios.get(`${routePath}/category/view`,{
+        params:{
+            search
+        }
+    })
+    .then(res=>{
+       setPath(res.data.STATICPATH); 
+        setData(res.data.viewData);
+    })
+    .catch((err)=>{
+        console.log(err);
+    })
+}
+let activeUpdate=(id,status)=>{
+    axios.put(`${routePath}/category/active/${id}`,{
+        status
+    })
+    .then(res=>{
+        if(res.data.status==1){
+            toast.success(res.data.msg,{
+                position:"top-center",
+                theme:"dark",
+                autoClose:1500
+            })
+        }
+        getData();
+    })
+    .catch((err)=>{
+        console.log(err);
+    })
+}
+
+ let allSelect=(event)=>{
+    if(event.target.checked){
+        setDelData(data.map(item=>item._id));
+    }
+    else{
+        setDelData([]);
+    }
+ }
+
+ let handleChange=(event)=>{
+    if(event.target.checked)
+    {
+         if(!delData.includes(event.target.value)){
+              setDelData([...delData,event.target.value])
+         }
+    } 
+    else{
+      setDelData(delData.filter(item=>item!=event.target.value));
+    }
+ }
+  
+ let deleteCategory=()=>{
+    axios.post(`${routePath}/category/delete`,{
+        ids:delData
+    })
+    .then(res=>{
+        toast.success(res.data.msg,{
+            position:"top-center",
+            theme:"dark",
+            autoClose:1500
+        })
+        getData();
+        setDelData([]);
+    })
+    .catch((err)=>{
+        console.log(err);
+    })
+ }
+
+useEffect(()=>{
+    if(search==''){
+       getData();
+    }
+},[search])
   return (
     <>
+    <ToastContainer/>
       <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
                 <p>Home</p>
                 <p>/</p>
@@ -17,9 +103,11 @@ let[show,setShow]=useState(false);
                                   {
                                       show ?
                                           <div className='p-[20px_10px] border rounded-lg  mb-[25px] bg-gray-300 '>
-                                              <form className='flex items-center gap-[10px]'>
-                                                  <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Name' name="viewCategory" />
-                                                  <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' />
+                                              <form className='flex items-center gap-[10px]'> 
+                                                  <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' value={search} placeholder='Serach Name' name="viewCategory" onChange={(e)=>{
+                                                    setSearch(e.target.value);
+                                                  }} />
+                                                  <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' onClick={getData} />
                                               </form>
                                           </div> : " "
                                   }
@@ -29,14 +117,14 @@ let[show,setShow]=useState(false);
                                           <div className='flex items-center gap-[10px]'>
                                               {show ? <MdFilterAltOff className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} /> : <FaFilter className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} />}
                                               <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer'>Change Status</button>
-                                              <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer'>Delete</button>
+                                              <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer' onClick={deleteCategory}>Delete</button>
                                           </div>
                                       </div>
                                       <div className='rounded-lg overflow-hidden'>
                                           <table className='w-[100%]'>
                                               <thead className='' bgcolor='#374151'>
                                                   <tr>
-                                                      <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' /></th>
+                                                      <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' onChange={allSelect} checked={delData.length==data.length&&data.length>=1&&delData.length!=1} /></th>
                                                       <th className='border p-[10px_10px] text-gray-400 font-normal w-[600px] text-left'>Name</th>
                                                       <th className='border p-[10px_10px] text-gray-400 font-normal'>Image</th>
                                                       <th className='border p-[10px_10px] text-gray-400 font-normal'>Order</th>
@@ -45,7 +133,30 @@ let[show,setShow]=useState(false);
                                                   </tr>
                                               </thead>
                                               <tbody className='' bgcolor="#1F2937">
-                                                  <tr className='text-center'>
+
+                                                {
+                                                    data.length>=1?
+                                                    data.map((item,index)=>{
+                                                        let{categoryImage,categoryName,categoryStatus,_id,categoryOrder}=item;
+                                                        return(
+                                                        <tr className='text-center' key={index}>
+                                                            <td className=' p-[30px_10px] text-white'><input type='checkbox' value={_id} onChange={handleChange} checked={delData.includes(_id)} /></td>
+                                                            <td className=' p-[30px_10px] text-white text-left'>{categoryName}</td> 
+                                                            <td className=' p-[30px_10px] text-gray-400 flex justify-center'>
+                                                                 <img src={path+categoryImage} width="40" height="40" />
+                                                            </td>                                        
+                                                            <td className=' p-[30px_10px] text-gray-400'>{categoryOrder}</td>
+                                                            <td className=' p-[30px_10px] text-white'><button className={`p-[5px_20px] text-white   ${categoryStatus?'bg-[#22C35D]':"bg-red-500"}  rounded-lg cursor-pointer`} onClick={()=>activeUpdate(_id, !categoryStatus)}>{categoryStatus?"Active":"Deactive"}</button></td>
+                                                            <td className=' p-[30px_10px] text-white'><Link to={`/update/category/${_id}`}><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer'/></Link></td>
+                                                        </tr>
+                                                        )
+                                                    })
+                                                   :
+                                                <tr className='text-center'>
+                                                <td colSpan={6} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
+                                                 </tr>
+                                                }
+                                                 {/* <tr className='text-center'>
                                                       <td className=' p-[30px_10px] text-white'><input type='checkbox' /></td>
                                                       <td className=' p-[30px_10px] text-white text-left'>Ronak Singh Bhati</td> 
                                                       <td className=' p-[30px_10px] text-gray-400 flex justify-center'>
@@ -65,7 +176,7 @@ let[show,setShow]=useState(false);
                                                       <td className=' p-[30px_10px] text-white'><button className='p-[5px_20px] text-white bg-[#F35959] rounded-lg cursor-pointer'>Deactive</button></td>
                                                       <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></td>
                                                   </tr>
-                                                  
+                                                 */}
                                               </tbody>
                   
                                           </table>

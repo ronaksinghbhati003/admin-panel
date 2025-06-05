@@ -1,6 +1,22 @@
-import React from 'react'
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 export default function Orders() {
+  let apiUrl=import.meta.env.VITE_APIURL;
+  let[orderData,setOrderData]=useState([]);
+  let getData=()=>{
+    axios.get(`${apiUrl}/order-admin/vieworder`)
+    .then((res)=>{
+      console.log(res);
+      setOrderData(res.data.viewOrder);
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  }
+  useEffect(()=>{
+    getData()
+  },[])
   return (
     <>
         <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
@@ -20,22 +36,38 @@ export default function Orders() {
                     <th className=' py-[10px]'>Quantity</th>
                     <th className=' py-[10px]'>Price</th>
                     <th className=' py-[10px]'>Date</th>
+                    <th className=' py-[10px]'>Time</th>
                     <th className=' py-[10px]'>Status</th>
                     <th className=' py-[10px]'>View</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className='text-center'>
-                    <td className='py-[10px]'><input type="checkbox" className='w-[18px] h-[25px]' /></td>
-                    <td className='py-[10px]'>1</td>
-                    <td className='py-[10px]'>ronak8890</td>
-                    <td className='py-[10px]'>ronak singh bhati</td>
-                    <td className='py-[10px]'>2</td>
-                    <td className='py-[10px]'>2500</td>
-                    <td className='py-[10px]'>10/08/2000</td>
-                    <td className='py-[10px]'>Processing....</td>
-                    <td className='py-[10px]'><button className='p-[5px_12px] rounded-full border hover:text-blue-600 cursor-pointer'>View</button></td>
-                </tr>
+                {orderData.length>=0?
+                        orderData.map((item,index)=>{
+                          let{updatedAt,orderAmount,orderQty,orderStatus,orderTime,orderUser,_id}=item;
+                           String(updatedAt);
+                          return(
+                            <React.Fragment key={index}>
+                                 <tr className='text-center'>
+                                     <td className='py-[10px]'><input type="checkbox" className='w-[18px] h-[25px]' /></td>
+                                     <td className='py-[10px]'>{index+1}</td>
+                                     <td className='py-[10px]'>{_id}</td>
+                                     <td className='py-[10px]'>{orderUser?.userName}</td>
+                                     <td className='py-[10px]'>{orderQty}</td>
+                                     <td className='py-[10px]'>{orderAmount}</td>
+                                     <td className='py-[10px]'>{updatedAt.slice(0,10)}</td>
+                                     <td className='py-[10px]'>{orderTime}</td>
+                                     <td className='py-[10px]'>{orderStatus}</td>
+                                     <td className='py-[10px]'><button className='p-[5px_12px] rounded-full border hover:text-blue-600 cursor-pointer'>View</button></td>
+                                 </tr>
+                            </React.Fragment>
+                          )
+                        })
+                 : 
+                     <tr className='text-center'>
+                                <td colSpan={9} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
+                         </tr>
+                }    
               </tbody>
           </table>
        </div>
