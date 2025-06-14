@@ -1,14 +1,19 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { loginContext } from "../common/MainLayout";
+import OrderDetail from "../common/OrderDetail";
 
 export default function Orders() {
+  let {orderDetail,setOrderDetail}=useContext(loginContext);
   let apiUrl=import.meta.env.VITE_APIURL;
   let[orderData,setOrderData]=useState([]);
+  let[imagePath,setImagePath]=useState('');
+  let[id,setId]=useState('');
   let getData=()=>{
     axios.get(`${apiUrl}/order-admin/vieworder`)
     .then((res)=>{
-      console.log(res);
       setOrderData(res.data.viewOrder);
+      setImagePath(res.data.imagePath);
     })
     .catch((err)=>{
       console.log(err);
@@ -19,6 +24,7 @@ export default function Orders() {
   },[])
   return (
     <>
+       {orderDetail?<OrderDetail orderDetail={orderDetail} setOrderDetail={setOrderDetail}  id={id} orderData={orderData} imagePath={imagePath}/>:null}
         <div className='w-[100%] border-b pb-[10px]  my-[10px] flex gap-[5px] font-semibold text-[16.5px]'>
          <p>Home</p>
          <p>/</p>
@@ -42,7 +48,7 @@ export default function Orders() {
                 </tr>
               </thead>
               <tbody>
-                {orderData.length>=0?
+                {orderData.length>0?
                         orderData.map((item,index)=>{
                           let{updatedAt,orderAmount,orderQty,orderStatus,orderTime,orderUser,_id}=item;
                            String(updatedAt);
@@ -58,14 +64,17 @@ export default function Orders() {
                                      <td className='py-[10px]'>{updatedAt.slice(0,10)}</td>
                                      <td className='py-[10px]'>{orderTime}</td>
                                      <td className='py-[10px]'>{orderStatus}</td>
-                                     <td className='py-[10px]'><button className='p-[5px_12px] rounded-full border hover:text-blue-600 cursor-pointer'>View</button></td>
+                                     <td className='py-[10px]'><button className='p-[5px_12px] rounded-full border hover:text-blue-600 cursor-pointer' onClick={()=>{
+                                      setOrderDetail(true);
+                                      setId(_id);
+                                       }}>View</button></td>
                                  </tr>
                             </React.Fragment>
                           )
                         })
                  : 
                      <tr className='text-center'>
-                                <td colSpan={9} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
+                          <td colSpan={9} className='py-2  text-[20px] '>Cart is Empty.........</td>
                          </tr>
                 }    
               </tbody>

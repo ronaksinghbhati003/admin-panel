@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
+import ResponsivePagination from 'react-responsive-pagination';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import { routePath } from './Config';
@@ -11,16 +12,20 @@ export default function ViewColor() {
     let[data,setData]=useState([]);
     let[selectId,setSelectId]=useState([]);
     let[title,setTitle]=useState({title:'',code:''});
-    
+    let[currentPage,setCurrentPage]=useState(1);
+    let[totalPages,setTotalPages]=useState(0);
+    console.log(totalPages);
     let getData=()=>{
         axios.get(`${routePath}/color/view`,{
             params:{
                 title:title.title,
-                code:title.code
+                code:title.code,
+                currentPage
              }
         }).
         then((res)=>{
             setData(res.data.viewData);
+            setTotalPages(res.data.totalPage);
         })
         .catch((err)=>{
             console.log(err);
@@ -118,7 +123,7 @@ export default function ViewColor() {
             
         }
         
-    },[title])
+    },[title,currentPage])
     return (
         <>
         <ToastContainer/>
@@ -161,6 +166,7 @@ export default function ViewColor() {
                             <thead className='' bgcolor='#374151'>
                                 <tr>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={data.length==selectId.length&&data.length>=1} onChange={allSelect}/></th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal'>Sr.No</th>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal w-[600px] text-left'>Color Name</th>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal'>Code</th>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal'>Order</th>
@@ -176,6 +182,7 @@ export default function ViewColor() {
                                         return(
                                             <tr className='text-center' key={index}>
                                             <td className=' p-[30px_10px] text-white'><input type='checkbox' value={_id} checked={selectId.includes(_id)} onChange={handleCheck}/></td>
+                                            <td className=' p-[30px_10px] text-white text-left'>{(currentPage-1)*10+index+1}</td>
                                             <td className=' p-[30px_10px] text-white text-left'>{colorName}</td>
                                             <td className=' p-[30px_10px] text-gray-400 text-[14px]'>{colorCode}</td>
                                             <td className=' p-[30px_10px] text-gray-400'>{colorOrder}</td>
@@ -185,7 +192,7 @@ export default function ViewColor() {
                                         )
                                        })
                                         :<tr className='text-center'>
-                                            <td colSpan={6} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
+                                            <td colSpan={7} className='py-2 text-white text-[20px] '>Cart is Empty.........</td>
                                         </tr>
                                     }
                                 
@@ -221,6 +228,11 @@ export default function ViewColor() {
                             </tbody>
 
                         </table>
+                        <ResponsivePagination
+                          current={currentPage}
+                          total={totalPages}
+                          onPageChange={setCurrentPage}
+                        />
                     </div>
                 </div>
             </div>
