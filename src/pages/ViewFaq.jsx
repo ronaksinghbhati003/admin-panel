@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
+import ResponsivePagination from 'react-responsive-pagination';
 import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import { routePath } from './Config';
@@ -11,13 +12,16 @@ export default function ViewFaq() {
     let [show, setShow] = useState(false);
     let [data, setData] = useState([]);
     let [selectId, setSelectId] = useState([]);
-    let[question,setQuestion]=useState('');
-    let[answer,setAnswer]=useState('');
+    let [question, setQuestion] = useState('');
+    let [answer, setAnswer] = useState('');
+    let[currentPage,setCurrentPage]=useState(1);
+    let[totalPages,setTotalPages]=useState(0);
     let getData = () => {
-        axios.get(`${routePath}/faq/view`,{
-            params:{
+        axios.get(`${routePath}/faq/view`, {
+            params: {
                 question,
-                answer
+                answer,
+                currentPage
             }
         }).
             then(res => {
@@ -29,6 +33,7 @@ export default function ViewFaq() {
                         autoClose: 1500,
                         draggable: true
                     });*/
+                    setTotalPages(res.data.totalPages);
                 }
 
             })
@@ -61,18 +66,18 @@ export default function ViewFaq() {
             data: { ids: selectId }
         })
             .then(res => {
-             
-                res.data.msg.includes("Delete")? toast.success(res.data.msg, {
+
+                res.data.msg.includes("Delete") ? toast.success(res.data.msg, {
                     position: 'top-center',
                     autoClose: 2000,
                     theme: 'dark',
-                }):
-                 toast.warning(res.data.msg, {
-                    position: 'top-center',
-                    autoClose: 2000,
-                    theme: 'dark',
-                });
-                ;   
+                }) :
+                    toast.warning(res.data.msg, {
+                        position: 'top-center',
+                        autoClose: 2000,
+                        theme: 'dark',
+                    });
+                ;
                 getData();
             }).catch((err) => {
                 alert(err.message);
@@ -80,31 +85,31 @@ export default function ViewFaq() {
 
     }
 
-     let updateStatus=(id,status)=>{
-        axios.put(`${routePath}/faq/active`,{
+    let updateStatus = (id, status) => {
+        axios.put(`${routePath}/faq/active`, {
             id,
             status
         })
-        .then(res=>{
-            console.log(res);
-              toast.success(res.data.msg,{
-                position:"top-center",
-                theme:"dark",
-                autoClose:1500
-              })
-        getData();
-        })
-        .catch(err=>{
-            console.log(err);
-        })
+            .then(res => {
+                console.log(res);
+                toast.success(res.data.msg, {
+                    position: "top-center",
+                    theme: "dark",
+                    autoClose: 1500
+                })
+                getData();
+            })
+            .catch(err => {
+                console.log(err);
+            })
     }
 
     useEffect(() => {
-        if(question==''&&answer==''){
+        if (question == '' && answer == '') {
             getData()
         }
-        
-    }, [question,answer])
+
+    }, [question, answer,currentPage])
     return (
         <>
             <ToastContainer />
@@ -121,10 +126,10 @@ export default function ViewFaq() {
                     show ?
                         <div className='p-[20px_10px] border rounded-lg  mb-[25px] bg-gray-300 '>
                             <form className='flex items-center gap-[10px]'>
-                                <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Question' name="viewFaq" onChange={(e)=>{
+                                <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Question' name="viewFaq" onChange={(e) => {
                                     setQuestion(e.target.value);
                                 }} />
-                                <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Answer' name="viewFaq" onChange={(e)=>{
+                                <input type='text' className='w-[350px] pl-2 py-[8px] rounded-[5px] bg-[#374151] text-white font-semibold' placeholder='Serach Answer' name="viewFaq" onChange={(e) => {
                                     setAnswer(e.target.value);
                                 }} />
                                 <FaMagnifyingGlass className='text-[40px] text-white rounded-lg cursor-pointer bg-[#2563EB] p-[8px_10px]' onClick={getData} />
@@ -144,7 +149,7 @@ export default function ViewFaq() {
                         <table className='w-[100%]'>
                             <thead className='' bgcolor='#374151'>
                                 <tr>
-                                    <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={selectId.length == data.length && data.length >= 1&&data.length!=0} onChange={allSelect} /></th>
+                                    <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={selectId.length == data.length && data.length >= 1 && data.length != 0} onChange={allSelect} /></th>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal w-[350px] text-left'>Question</th>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal w-[500px] text-left'>Answer</th>
                                     <th className='border p-[10px_10px] text-gray-400 font-normal'>Order</th>
@@ -161,7 +166,7 @@ export default function ViewFaq() {
                                             <td className=' p-[30px_10px] text-white text-left'>{faqQuestion}</td>
                                             <td className=' p-[30px_10px] text-white text-justify'>{faqAnswer}</td>
                                             <td className=' p-[30px_10px] text-gray-400'>{faqOrder}</td>
-                                            <td className=' p-[30px_10px] text-white'>{faqStatus ? <button className='p-[5px_20px] text-white bg-[#22C35D] rounded-lg cursor-pointer' onClick={()=>updateStatus(_id,false)}>Active</button> : <button className='p-[5px_20px] text-white bg-red-500 rounded-lg cursor-pointer' onClick={()=>updateStatus(_id,true)}>Deactive</button>}</td>
+                                            <td className=' p-[30px_10px] text-white'>{faqStatus ? <button className='p-[5px_20px] text-white bg-[#22C35D] rounded-lg cursor-pointer' onClick={() => updateStatus(_id, false)}>Active</button> : <button className='p-[5px_20px] text-white bg-red-500 rounded-lg cursor-pointer' onClick={() => updateStatus(_id, true)}>Deactive</button>}</td>
                                             <td className=' p-[30px_10px] text-white'><Link to={`/updatefaq/${_id}`}><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></Link></td>
                                         </tr>
                                     )
@@ -190,6 +195,11 @@ export default function ViewFaq() {
                             </tbody>
 
                         </table>
+                        <ResponsivePagination
+                            current={currentPage}
+                            total={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
                     </div>
                 </div>
             </div>

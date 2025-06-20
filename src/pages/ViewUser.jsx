@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaFilter } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit, MdFilterAltOff } from "react-icons/md";
+import ResponsivePagination from 'react-responsive-pagination';
 import { toast, ToastContainer } from 'react-toastify';
 
 export default function ViewUser() {
@@ -10,18 +11,23 @@ export default function ViewUser() {
   let [user, setUser] = useState([]);
   let [select, setSelect] = useState([]);
   let [search, setSearch] = useState('');
-  let [status, setStatus] = useState(JSON.parse(localStorage.getItem('value'))??true);
+  let [status, setStatus] = useState(JSON.parse(localStorage.getItem('value')) ?? true);
+  let[currentPage,setCurrentPage]=useState(1);
+  let[totalPages,setTotalPages]=useState(0);
   console.log(select);
   console.log(status);
   let apiUrl = import.meta.env.VITE_APIURL;
   let getData = () => {
     axios.get(`${apiUrl}/user/userview`, {
       params: {
-        search
+        search,
+        currentPage,
       }
     })
       .then((res) => {
+        console.log(res);
         setUser(res.data.viewUser);
+        setTotalPages(res.data.totalPages);
       })
       .catch((err) => {
         console.log(err);
@@ -76,30 +82,30 @@ export default function ViewUser() {
       })
   }
 
-   let deleteUser=()=>{
-    axios.delete(`${apiUrl}/user/deleteuser`,{
-      data:{
+  let deleteUser = () => {
+    axios.delete(`${apiUrl}/user/deleteuser`, {
+      data: {
         select
       }
     })
-    .then(res=>{
-      if(select.length>=1){
-      toast.success(res.data.msg,{
-        position:"top-center",
-        theme:"dark",
-        autoClose:1500
+      .then(res => {
+        if (select.length >= 1) {
+          toast.success(res.data.msg, {
+            position: "top-center",
+            theme: "dark",
+            autoClose: 1500
+          })
+          getData();
+          setSelect([]);
+        }
       })
-      getData();
-      setSelect([]);
-     }
-    })
-   }  
+  }
 
 
   useEffect(() => {
     if (search == '') getData();
-    localStorage.setItem('value',JSON.stringify(status))
-  }, [search,status]);
+    localStorage.setItem('value', JSON.stringify(status))
+  }, [search, status,currentPage]);
 
   return (
     <>
@@ -139,7 +145,7 @@ export default function ViewUser() {
             <table className='w-[100%]'>
               <thead className='' bgcolor='#374151'>
                 <tr>
-                  <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={user.length == select.length && user.length >= 1} onChange={allSelect} /></th>
+                  <th className='border p-[10px_10px] text-gray-400 font-normal'> <input type='checkbox' checked={user?.length == select?.length && user?.length >= 1} onChange={allSelect} /></th>
                   <th className='border p-[10px_10px] text-gray-400 font-normal'>Sr.No</th>
                   <th className='border p-[10px_10px] text-gray-400 font-normal w-[600px] text-left'> Name</th>
                   <th className='border p-[10px_10px] text-gray-400 font-normal'>EMAIL ID</th>
@@ -150,7 +156,7 @@ export default function ViewUser() {
               </thead>
               <tbody className='' bgcolor="#1F2937">
 
-                {user.length >= 1 ?
+                {user?.length >= 1 ?
                   user.map((item, index) => {
                     let { userEmail, userName, userNumber, userStatus, _id } = item;
                     return (
@@ -159,7 +165,7 @@ export default function ViewUser() {
                         <td className=' p-[30px_10px] text-white'>{index + 1}</td>
                         <td className=' p-[30px_10px] text-white text-left'>{userName}</td>
                         <td className=' p-[30px_10px] text-gray-400 text-[14px]'>{userEmail}</td>
-                        <td className=' p-[30px_10px] text-gray-400'>{userNumber==""?"None":userNumber}</td>
+                        <td className=' p-[30px_10px] text-gray-400'>{userNumber == "" ? "None" : userNumber}</td>
                         <td className=' p-[30px_10px] text-white'><button className={`p-[5px_20px] text-white ${userStatus ? "bg-[#22C35D]" : "bg-red-500"}  rounded-lg cursor-pointer`} onClick={() => statusUpdate(_id, !userStatus)} >{userStatus ? "Active" : "Deactive"}</button></td>
                         <td className=' p-[30px_10px] text-white'><MdEdit className='p-[5px_10px] text-[40px] bg-[#1D4ED8] rounded-[100%] cursor-pointer' /></td>
                       </tr>
@@ -173,6 +179,11 @@ export default function ViewUser() {
               </tbody>
 
             </table>
+            <ResponsivePagination
+              current={currentPage}
+              total={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       </div>

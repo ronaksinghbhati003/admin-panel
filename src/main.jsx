@@ -127,6 +127,10 @@ let router=createBrowserRouter([
           element:<ViewProduct/>
          },
          {
+          path:'/updateproduct/:id',
+          element:<AddProduct/>
+         },
+         {
           path:'/addwhychooseus',
           element:<AddWhyChoose/>
          },
