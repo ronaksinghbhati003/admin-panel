@@ -14,7 +14,7 @@ export default function ViewColor() {
     let[title,setTitle]=useState({title:'',code:''});
     let[currentPage,setCurrentPage]=useState(1);
     let[totalPages,setTotalPages]=useState(0);
-    console.log(totalPages);
+    console.log(selectId);
     let getData=()=>{
         axios.get(`${routePath}/color/view`,{
             params:{
@@ -99,7 +99,8 @@ export default function ViewColor() {
     let updateStatus=(id,status)=>{
         axios.put(`${routePath}/color/active`,{
             id,
-            status
+            status,
+            selectId
         })
         .then(res=>{
               toast.success(res.data.msg,{
@@ -108,6 +109,7 @@ export default function ViewColor() {
                 autoClose:1500
               })
         getData();
+        setSelectId([]);
         })
         .catch(err=>{
             console.log(err);
@@ -157,7 +159,7 @@ export default function ViewColor() {
                         <h1 className='text-[25px] font-semibold'>View Color</h1>
                         <div className='flex items-center gap-[10px]'>
                             {show ? <MdFilterAltOff className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} /> : <FaFilter className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} />}
-                            <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer'>Change Status</button>
+                            <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer' onClick={()=>updateStatus(null,null)}>Change Status</button>
                             <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer' onClick={deleteAll}>Delete</button>
                         </div>
                     </div>

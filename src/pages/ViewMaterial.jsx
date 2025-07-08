@@ -69,7 +69,8 @@ export default function ViewMaterial() {
     let updateStatus = (id, status) => {
         axios.put(`${routePath}/material/active`, {
             id,
-            status
+            status,
+            selectId
         })
             .then(res => {
                 toast.success(res.data.msg, {
@@ -78,6 +79,7 @@ export default function ViewMaterial() {
                     autoClose: 1500
                 })
                 getData();
+                setSelectId([]);
             })
             .catch(err => {
                 console.log(err);
@@ -117,7 +119,7 @@ export default function ViewMaterial() {
                         <h1 className='text-[25px] font-semibold'>View Material</h1>
                         <div className='flex items-center gap-[10px]'>
                             {show ? <MdFilterAltOff className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} /> : <FaFilter className='p-[8px_8px] text-[35px] bg-[#2563EB] rounded-lg text-white cursor-pointer ' onClick={() => setShow(!show)} />}
-                            <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer'>Change Status</button>
+                            <button className='p-[8px_15px] bg-[#15803D] text-white text-[18px] rounded-lg cursor-pointer' onClick={()=>updateStatus(null,null)}>Change Status</button>
                             <button className='p-[8px_10px] bg-[#B91C1C] text-white text-[18px] rounded-lg cursor-pointer' onClick={deleteAllData}>Delete</button>
                         </div>
                     </div>

@@ -11,7 +11,7 @@ export default function ViewUser() {
   let [user, setUser] = useState([]);
   let [select, setSelect] = useState([]);
   let [search, setSearch] = useState('');
-  let [status, setStatus] = useState(JSON.parse(localStorage.getItem('value')) ?? true);
+  let [status, setStatus] = useState(false);
   let[currentPage,setCurrentPage]=useState(1);
   let[totalPages,setTotalPages]=useState(0);
   console.log(select);
@@ -100,11 +100,8 @@ export default function ViewUser() {
         }
       })
   }
-
-
   useEffect(() => {
     if (search == '') getData();
-    localStorage.setItem('value', JSON.stringify(status))
   }, [search, status,currentPage]);
 
   return (
